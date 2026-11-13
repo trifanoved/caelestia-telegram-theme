@@ -15,6 +15,7 @@ import sys
 import tempfile
 import time
 import zipfile
+import io
 
 
 HOME = Path.home()
@@ -85,16 +86,30 @@ def load_config() -> dict:
         "output_file": str(DEFAULT_OUTPUT),
         "telegram_binary": "/usr/bin/Telegram",
         "restart_timeout_seconds": 20,
+        "background": {
+            "enabled": False,
+            "blur_radius": 12.0,
+            "brightness": 0.72,
+        },
     }
+
     try:
         user = json.loads(CONFIG_FILE.read_text(encoding="utf-8"))
+
         if not isinstance(user, dict):
             raise ValueError("config root must be a JSON object")
+
+        user_background = user.pop("background", {})
+        if not isinstance(user_background, dict):
+            raise ValueError("'background' must be a JSON object")
+
         defaults.update(user)
+        defaults["background"].update(user_background)
+
     except FileNotFoundError:
         pass
-    return defaults
 
+    return defaults
 
 def setup_logging() -> None:
     APP_STATE.mkdir(parents=True, exist_ok=True)
@@ -157,6 +172,97 @@ def get_wallpaper() -> Path:
     )
 
 
+def process_wallpaper(
+    wallpaper: Path,
+    settings: dict,
+) -> tuple[str, bytes | None]:
+    """
+    Process the current wallpaper for Telegram.
+
+    Returns:
+        (archive_filename, image_data)
+
+    If processing is disabled, image_data is None and the original
+    wallpaper can be added directly to the archive.
+    """
+    suffix = wallpaper.suffix.lower()
+
+    formats = {
+        ".jpg": ("background.jpg", "JPEG"),
+        ".jpeg": ("background.jpg", "JPEG"),
+        ".png": ("background.png", "PNG"),
+    }
+
+    if suffix not in formats:
+        raise ValueError(
+            f"Telegram theme wallpaper must be JPEG or PNG; got {wallpaper.name}"
+        )
+
+    archive_name, image_format = formats[suffix]
+
+    enabled = settings.get("enabled", False)
+
+    if not isinstance(enabled, bool):
+        raise ValueError("background.enabled must be a boolean")
+
+    if not enabled:
+        return archive_name, None
+
+    try:
+        from PIL import Image, ImageEnhance, ImageFilter, ImageOps
+    except ImportError as exc:
+        raise RuntimeError(
+            "Wallpaper processing requires Pillow. "
+            "Install it with: sudo pacman -S python-pillow"
+        ) from exc
+
+    try:
+        blur_radius = float(settings.get("blur_radius", 12.0))
+        brightness = float(settings.get("brightness", 0.72))
+    except (TypeError, ValueError) as exc:
+        raise ValueError("Invalid background processing settings") from exc
+
+    if not 0 <= blur_radius <= 100:
+        raise ValueError("background.blur_radius must be between 0 and 100")
+
+    if not 0 <= brightness <= 2:
+        raise ValueError("background.brightness must be between 0 and 2")
+
+    with Image.open(wallpaper) as source:
+        image = ImageOps.exif_transpose(source).convert("RGB")
+
+    if blur_radius > 0:
+        image = image.filter(
+            ImageFilter.GaussianBlur(radius=blur_radius)
+        )
+
+    if brightness != 1.0:
+        image = ImageEnhance.Brightness(image).enhance(brightness)
+
+    buffer = io.BytesIO()
+
+    save_options = {}
+    if image_format == "JPEG":
+        save_options = {
+            "quality": 95,
+            "optimize": True,
+        }
+
+    image.save(
+        buffer,
+        format=image_format,
+        **save_options,
+    )
+
+    logging.info(
+        "Processed wallpaper: blur=%.1f brightness=%.2f",
+        blur_radius,
+        brightness,
+    )
+
+    return archive_name, buffer.getvalue()
+
+
 def make_colors(scheme: dict) -> str:
     colours = scheme.get("colours")
     if not isinstance(colours, dict):
@@ -194,15 +300,12 @@ def generate() -> Path:
         raise ValueError("scheme.json root must be a JSON object")
 
     wallpaper = get_wallpaper()
-    suffix = wallpaper.suffix.lower()
-    if suffix in (".jpg", ".jpeg"):
-        archive_wallpaper = "background.jpg"
-    elif suffix == ".png":
-        archive_wallpaper = "background.png"
-    else:
-        raise ValueError(
-            f"Telegram theme wallpaper must be JPEG or PNG; got {wallpaper.name}"
-        )
+
+    background_settings = config.get("background", {})
+    archive_wallpaper, processed_wallpaper = process_wallpaper(
+        wallpaper,
+        background_settings,
+    )
 
     colors_text = make_colors(scheme)
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -214,7 +317,10 @@ def generate() -> Path:
     try:
         with zipfile.ZipFile(temp_path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
             archive.writestr("colors.tdesktop-theme", colors_text)
-            archive.write(wallpaper, archive_wallpaper)
+            if processed_wallpaper is not None:
+                archive.writestr(archive_wallpaper, processed_wallpaper)
+            else:
+                archive.write(wallpaper, archive_wallpaper)
         # Validate archive before replacing the previously working theme.
         with zipfile.ZipFile(temp_path, "r") as archive:
             bad = archive.testzip()
@@ -496,9 +602,110 @@ def trigger() -> None:
     )
 
 
+def configure() -> None:
+    config = load_config()
+    background = config["background"]
+
+    def ask_bool(prompt: str, current: bool) -> bool:
+        default = "Y/n" if current else "y/N"
+
+        while True:
+            answer = input(f"{prompt} [{default}]: ").strip().lower()
+
+            if not answer:
+                return current
+            if answer in ("y", "yes"):
+                return True
+            if answer in ("n", "no"):
+                return False
+
+            print("Enter y or n.")
+
+    def ask_float(
+        prompt: str,
+        current: float,
+        minimum: float,
+        maximum: float,
+    ) -> float:
+        while True:
+            answer = input(f"{prompt} [{current}]: ").strip()
+
+            if not answer:
+                return current
+
+            try:
+                value = float(answer)
+            except ValueError:
+                print("Enter a valid number.")
+                continue
+
+            if minimum <= value <= maximum:
+                return value
+
+            print(f"Value must be between {minimum} and {maximum}.")
+
+    print("\nCaelestia Telegram Theme configuration")
+    print("--------------------------------------")
+    print("Wallpaper processing")
+
+    background["enabled"] = ask_bool(
+        "Enable wallpaper blur and darkening?",
+        background["enabled"],
+    )
+
+    if background["enabled"]:
+        background["blur_radius"] = ask_float(
+            "Blur radius (0-100)",
+            float(background["blur_radius"]),
+            0,
+            100,
+        )
+
+        background["brightness"] = ask_float(
+            "Brightness multiplier (0-2; 1 = original)",
+            float(background["brightness"]),
+            0,
+            2,
+        )
+
+    CONFIG_FILE.parent.mkdir(parents=True, exist_ok=True)
+
+    fd, temp_name = tempfile.mkstemp(
+        prefix=CONFIG_FILE.name + ".",
+        suffix=".tmp",
+        dir=CONFIG_FILE.parent,
+    )
+
+    temp_path = Path(temp_name)
+
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as file:
+            json.dump(config, file, indent=4, ensure_ascii=False)
+            file.write("\n")
+
+        os.replace(temp_path, CONFIG_FILE)
+
+    finally:
+        temp_path.unlink(missing_ok=True)
+
+    print(f"\nConfiguration saved to: {CONFIG_FILE}")
+
+    if background["enabled"]:
+        try:
+            import PIL  # noqa: F401
+        except ImportError:
+            print(
+                "\nWarning: Pillow is not installed. "
+                "Install it with: sudo pacman -S python-pillow"
+            )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=("generate", "update", "trigger", "status"))
+    parser.add_argument(
+    "action",
+    choices=("generate", "update", "trigger", "status", "configure"),
+    )
     args = parser.parse_args()
     setup_logging()
     try:
@@ -513,6 +720,8 @@ def main() -> int:
             print(f"Output: {load_config()['output_file']}")
             print(f"Telegram running: {'yes' if telegram_pids() else 'no'}")
             print(f"Log: {LOG_FILE}")
+        elif args.action == "configure":
+            configure()
         return 0
     except Exception as exc:
         logging.exception("Action %s failed: %s", args.action, exc)
