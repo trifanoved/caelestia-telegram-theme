@@ -43,19 +43,19 @@ COLOR_MAP = {
     "titleBgActive": ("surfaceContainer", "surface"),
     "dialogsBg": ("surfaceContainer", "surface"),
     "dialogsBgOver": ("surfaceContainerHigh", "surfaceVariant"),
-    "dialogsBgActive": ("primaryContainer", "surfaceContainerHigh"),
+    "dialogsBgActive": ("surfaceContainerHigh", "primaryContainer"),
     "dialogsNameFg": ("onSurface", "text"),
     "dialogsNameFgOver": ("onSurface", "text"),
-    "dialogsNameFgActive": ("onPrimaryContainer", "onSurface"),
+    "dialogsNameFgActive": ("onSurface", "text"),
     "dialogsTextFg": ("onSurfaceVariant", "subtext1"),
-    "dialogsTextFgActive": ("onPrimaryContainer", "onSurface"),
+    "dialogsTextFgActive": ("onSurfaceVariant", "subtext1"),
     "dialogsDateFg": ("onSurfaceVariant", "subtext1"),
-    "dialogsDateFgActive": ("onPrimaryContainer", "onSurface"),
+    "dialogsDateFgActive": ("onSurfaceVariant", "subtext1"),
     "filterInputInactiveBg": ("surfaceContainerHigh", "surfaceVariant"),
     "filterInputActiveBg": ("surfaceContainerHighest", "surfaceContainerHigh"),
     "filterInputBorderFg": ("outline", "outlineVariant"),
     "sideBarBg": ("surface", "background"),
-    "sideBarBgActive": ("primaryContainer", "surfaceContainerHigh"),
+    "sideBarBgActive": ("surfaceContainerHigh", "primaryContainer"),
     "sideBarTextFg": ("onSurface", "text"),
     "sideBarTextFgActive": ("onPrimaryContainer", "onSurface"),
     "sideBarIconFg": ("onSurfaceVariant", "subtext1"),
@@ -78,6 +78,59 @@ COLOR_MAP = {
     "lightButtonBg": ("surfaceContainerHigh", "surfaceVariant"),
     "lightButtonFg": ("onSurface", "text"),
     "inputBorderFg": ("outline", "outlineVariant"),
+        # Window interactions
+    "windowBgRipple": ("primaryContainer", "surfaceContainerHighest"),
+
+    # Dialogs: hover and unread counters
+    "dialogsTextFgOver": ("onSurface", "text"),
+    "dialogsDateFgOver": ("onSurfaceVariant", "subtext1"),
+
+    "dialogsUnreadBg": ("primary", "surfaceTint"),
+    "dialogsUnreadBgMuted": ("surfaceContainerHighest", "surfaceVariant"),
+    "dialogsUnreadFg": ("onPrimary", "onSurface"),
+
+    "dialogsUnreadBgOver": ("primaryDim", "primary"),
+    "dialogsUnreadBgMutedOver": ("surfaceContainerHigh", "surfaceVariant"),
+    "dialogsUnreadFgOver": ("onPrimary", "onSurface"),
+
+    "dialogsUnreadBgActive": ("onPrimaryContainer", "primary"),
+    "dialogsUnreadBgMutedActive": ("onPrimaryContainer", "primary"),
+    "dialogsUnreadFgActive": ("primaryContainer", "onPrimary"),
+
+    # Buttons
+    "activeButtonBgOver": ("primaryDim", "primary"),
+    "activeButtonBgRipple": ("primaryContainer", "primaryDim"),
+    "lightButtonBgOver": ("surfaceContainerHighest", "surfaceContainerHigh"),
+    "lightButtonBgRipple": ("secondaryContainer", "surfaceContainerHighest"),
+
+    # Menus
+    "menuBg": ("surfaceContainer", "surface"),
+    "menuBgOver": ("surfaceContainerHigh", "surfaceVariant"),
+    "menuBgRipple": ("primaryContainer", "surfaceContainerHighest"),
+    "menuIconFg": ("onSurfaceVariant", "subtext1"),
+    "menuIconFgOver": ("primary", "surfaceTint"),
+
+    # Inputs
+    "placeholderFg": ("onSurfaceVariant", "subtext1"),
+    "placeholderFgActive": ("primary", "surfaceTint"),
+
+    # Message selection
+    "msgInBgSelected": ("secondaryContainer", "surfaceContainerHighest"),
+    "msgOutBgSelected": ("primaryDim", "primaryContainer"),
+    "msgSelectOverlay": ("primaryContainer", "secondaryContainer"),
+
+    # System messages and unread separator
+    "historySystemBg": ("surfaceContainerHigh", "surfaceVariant"),
+    "historySystemFg": ("onSurface", "text"),
+    "historyUnreadBarBg": ("primaryContainer", "surfaceContainerHighest"),
+    "historyUnreadBarBorder": ("surface", "background"),
+    "historyUnreadBarFg": ("onPrimaryContainer", "onSurface"),
+
+    # History scrollbars
+    "historyScrollBarBg": ("primaryDim", "primary"),
+    "historyScrollBarBgOver": ("primary", "surfaceTint"),
+    "historyScrollBg": ("surfaceContainerHighest", "surfaceVariant"),
+    "historyScrollBgOver": ("outline", "outlineVariant"),
 }
 
 def load_config() -> dict:
