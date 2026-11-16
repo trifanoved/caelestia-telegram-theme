@@ -54,8 +54,12 @@ def main() -> int:
     app_file.unlink(missing_ok=True)
     # Preserve the generated theme: Telegram may still refer to it.
     print("Uninstalled service, launcher and Caelestia hooks.")
-    print(f"Preserved generated theme and logs under {app_dir} and ~/.local/state/caelestia-telegram-theme.")
+    print(
+        f"Preserved generated theme, logs, and config.json (if any) under "
+        f"{app_dir}, ~/.local/state/caelestia-telegram-theme, and "
+        f"{CONFIG / 'caelestia-telegram-theme'}."
+    )
     return 0
-
+    
 if __name__ == "__main__":
     raise SystemExit(main())
