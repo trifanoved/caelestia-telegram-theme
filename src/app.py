@@ -157,6 +157,38 @@ COLOR_MAP = {
     "historyScrollBarBgOver": ("primary", "surfaceTint"),
     "historyScrollBg": ("surfaceContainerHighest", "surfaceVariant"),
     "historyScrollBgOver": ("outline", "outlineVariant"),
+
+        # Sent message checkmarks
+    "dialogsSentIconFg": ("primary", "surfaceTint"),
+    "dialogsSentIconFgOver": ("primary", "surfaceTint"),
+    "dialogsSentIconFgActive": ("primary", "surfaceTint"),
+
+    "historyOutIconFg": ("primary", "surfaceTint"),
+    "historyOutIconFgSelected": ("onPrimaryContainer", "primary"),
+
+    "historySendingOutIconFg": ("secondary", "primary"),
+    "historySendingInIconFg": ("onSurfaceVariant", "subtext1"),
+
+        # Reply previews inside message bubbles
+    "msgInServiceFg": ("secondary", "primary"),
+    "msgInServiceFgSelected": ("onSecondaryContainer", "onSurface"),
+
+    "msgOutServiceFg": ("primary", "surfaceTint"),
+    "msgOutServiceFgSelected": ("onPrimaryContainer", "primary"),
+
+    "msgInReplyBarColor": ("secondary", "primary"),
+    "msgInReplyBarSelColor": ("onSecondaryContainer", "primary"),
+
+    "msgOutReplyBarColor": ("primary", "surfaceTint"),
+    "msgOutReplyBarSelColor": ("onPrimaryContainer", "primary"),
+
+    "msgImgReplyBarColor": ("primary", "surfaceTint"),
+
+        # Reply preview above the compose field
+    "historyReplyBg": ("surfaceContainerHigh", "surfaceContainer"),
+    "historyReplyIconFg": ("primary", "surfaceTint"),
+    "historyReplyCancelFg": ("onSurfaceVariant", "subtext1"),
+    "historyReplyCancelFgOver": ("primary", "surfaceTint"),
 }
 
 def load_config() -> dict:
