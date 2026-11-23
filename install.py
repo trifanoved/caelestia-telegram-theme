@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
+"""Install the Caelestia Telegram Theme integration for the current user."""
+
 from __future__ import annotations
+
 import json
 import os
 from pathlib import Path
 import shutil
 import subprocess
-import sys
 
 HOME = Path.home()
 DATA = Path(os.environ.get("XDG_DATA_HOME", HOME / ".local/share"))
@@ -13,13 +15,17 @@ CONFIG = Path(os.environ.get("XDG_CONFIG_HOME", HOME / ".config"))
 SYSTEMD = CONFIG / "systemd/user"
 PROJECT = Path(__file__).resolve().parent
 APP_DIR = DATA / "caelestia-telegram-theme"
-APP_STATE = Path(os.environ.get("XDG_STATE_HOME", HOME / ".local/state")) / "caelestia-telegram-theme"
 CLI_CONFIG = CONFIG / "caelestia/cli.json"
-HOOK = str(HOME / ".local/bin/caelestia-telegram-theme") + " trigger"
+LAUNCHER = HOME / ".local/bin/caelestia-telegram-theme"
+HOOK = str(LAUNCHER) + " trigger"
+TELEGRAM_BINARY = Path("/usr/bin/Telegram")
+PILLOW_PACKAGE = "python-pillow"
+
 
 def require(command: str, message: str) -> None:
     if shutil.which(command) is None:
         raise SystemExit(f"Missing dependency: {command}. {message}")
+
 
 def write_json_atomic(path: Path, data: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -27,39 +33,93 @@ def write_json_atomic(path: Path, data: dict) -> None:
     temp.write_text(json.dumps(data, indent=4, ensure_ascii=False) + "\n", encoding="utf-8")
     os.replace(temp, path)
 
-def main() -> int:
-    require("python3", "Install Python 3.")
-    require("systemctl", "Install systemd.")
-    require("caelestia", "Make sure caelestia-cli is installed and available in PATH.")
-    telegram = Path("/usr/bin/Telegram")
-    if not telegram.exists():
-        raise SystemExit("Could not find /usr/bin/Telegram. Edit config.json after installation if your binary is elsewhere.")
+
+def pillow_available() -> bool:
+    """Check Pillow in a fresh interpreter (avoids import cache after pacman)."""
+    try:
+        result = subprocess.run(
+            ["/usr/bin/python3", "-c", "import PIL"],
+            capture_output=True,
+            timeout=5,
+            check=False,
+        )
+        return result.returncode == 0
+    except (OSError, subprocess.SubprocessError):
+        return False
+
+
+def ensure_pillow() -> bool:
+    """
+    Pillow is needed by the default configuration (background.enabled=true).
+    Offer to install it via pacman; return whether it is available afterwards.
+    """
+    if pillow_available():
+        return True
+
+    print("\nOptional dependency missing: python-pillow (Pillow)")
+    print("  Required for wallpaper processing, which is enabled by default")
+    print("  (background.enabled=true in config.json).")
+
+    if shutil.which("pacman") is None:
+        print("  pacman not found. Install 'python-pillow' manually, or disable")
+        print("  wallpaper processing later with `caelestia-telegram-theme configure`.")
+        return False
+
+    try:
+        answer = input("  Install it now with pacman? [Y/n]: ").strip().lower()
+    except EOFError:
+        answer = ""
+
+    if answer in ("n", "no"):
+        print("  Skipped. You can install it later with:")
+        print("    sudo pacman -S python-pillow")
+        return False
+
+    cmd = ["pacman", "-S", "--noconfirm", PILLOW_PACKAGE]
+    if os.geteuid() != 0:
+        if shutil.which("sudo") is None:
+            print("  Cannot install: sudo is not available.")
+            return False
+        cmd.insert(0, "sudo")
+
+    try:
+        subprocess.run(cmd, check=False)
+    except OSError as exc:
+        print(f"  Failed to run pacman: {exc}")
+        return False
+
+    if pillow_available():
+        print("  Installed python-pillow.")
+        return True
+
+    print("  python-pillow is still missing.")
+    return False
+
+
+def install_app() -> None:
+    source = PROJECT / "src/app.py"
+    if not source.is_file():
+        raise SystemExit(
+            f"Could not find {source}. Run install.py from the project root."
+        )
 
     APP_DIR.mkdir(parents=True, exist_ok=True)
-    APP_STATE.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(PROJECT / "src/app.py", APP_DIR / "app.py")
-    (APP_DIR / "app.py").chmod(0o755)
+    target = APP_DIR / "app.py"
+    shutil.copy2(source, target)
+    target.chmod(0o755)
 
-    bin_dir = HOME / ".local/bin"
-    bin_dir.mkdir(parents=True, exist_ok=True)
-    launcher = bin_dir / "caelestia-telegram-theme"
-    launcher.write_text(
+
+def install_launcher() -> None:
+    LAUNCHER.parent.mkdir(parents=True, exist_ok=True)
+    LAUNCHER.write_text(
         "#!/bin/sh\n"
         f'exec /usr/bin/python3 "{APP_DIR / "app.py"}" "$@"\n',
         encoding="utf-8",
     )
-    launcher.chmod(0o755)
+    LAUNCHER.chmod(0o755)
 
-    config_path = CONFIG / "caelestia-telegram-theme/config.json"
-    config_path.parent.mkdir(parents=True, exist_ok=True)
-    if not config_path.exists():
-        write_json_atomic(config_path, {
-            "scheme_file": str(Path(os.environ.get("XDG_STATE_HOME", HOME / ".local/state")) / "caelestia/scheme.json"),
-            "output_file": str(DATA / "caelestia-telegram-theme/current.tdesktop-theme"),
-            "telegram_binary": "/usr/bin/Telegram",
-            "restart_timeout_seconds": 20
-        })
 
+def install_unit() -> None:
     unit = SYSTEMD / "caelestia-telegram-theme.service"
     unit.parent.mkdir(parents=True, exist_ok=True)
     unit.write_text(
@@ -78,6 +138,8 @@ def main() -> int:
         encoding="utf-8",
     )
 
+
+def merge_hooks() -> None:
     if CLI_CONFIG.exists():
         try:
             cli = json.loads(CLI_CONFIG.read_text(encoding="utf-8"))
@@ -91,7 +153,9 @@ def main() -> int:
     for section in ("wallpaper", "theme"):
         block = cli.setdefault(section, {})
         if not isinstance(block, dict):
-            raise SystemExit(f"Invalid '{section}' section in {CLI_CONFIG}; expected an object.")
+            raise SystemExit(
+                f"Invalid '{section}' section in {CLI_CONFIG}; expected an object."
+            )
         existing = block.get("postHook", "")
         if existing and not isinstance(existing, str):
             raise SystemExit(f"Invalid {section}.postHook: expected a string.")
@@ -99,6 +163,26 @@ def main() -> int:
             block["postHook"] = f"{existing.rstrip()}; {HOOK}" if existing.strip() else HOOK
 
     write_json_atomic(CLI_CONFIG, cli)
+
+
+def main() -> int:
+    require("python3", "Install Python 3.")
+    require("systemctl", "Install systemd.")
+    require("caelestia", "Make sure caelestia-cli is installed and available in PATH.")
+
+    if not TELEGRAM_BINARY.exists():
+        raise SystemExit(
+            "Could not find /usr/bin/Telegram. "
+            "Edit config.json after installation if your binary is elsewhere."
+        )
+
+    pillow_ok = ensure_pillow()
+
+    install_app()
+    install_launcher()
+    install_unit()
+    merge_hooks()
+
     subprocess.run(["systemctl", "--user", "daemon-reload"], check=True)
 
     print("\nInstalled Caelestia Telegram Theme.")
@@ -110,10 +194,23 @@ def main() -> int:
     print("       Settings -> Chat Settings -> Choose from file")
     print("  3. Keep Telegram open; subsequent Caelestia palette/wallpaper changes")
     print("     will regenerate the same file and restart Telegram automatically.")
+
+    if not pillow_ok:
+        print("\nWarning: Pillow is missing. The default configuration enables")
+        print("wallpaper processing (background.enabled=true), so `generate` will")
+        print("fail until you either install python-pillow or disable processing:")
+        print("  sudo pacman -S python-pillow")
+        print("    -- or --")
+        print("  ~/.local/bin/caelestia-telegram-theme configure")
+
+    print("\nCustomize wallpaper blur/brightness with:")
+    print("  ~/.local/bin/caelestia-telegram-theme configure")
+
     print("\nThe existing hypr-user.lua is not modified.")
-    if str(bin_dir) not in os.environ.get("PATH", "").split(":"):
-        print(f"\nNote: add {bin_dir} to PATH if you want to run the command by name.")
+    if str(LAUNCHER.parent) not in os.environ.get("PATH", "").split(":"):
+        print(f"\nNote: add {LAUNCHER.parent} to PATH if you want to run the command by name.")
     return 0
+
 
 if __name__ == "__main__":
     raise SystemExit(main())

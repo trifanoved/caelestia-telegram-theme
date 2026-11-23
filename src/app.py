@@ -15,6 +15,7 @@ import sys
 import tempfile
 import time
 import zipfile
+import io
 
 
 HOME = Path.home()
@@ -37,6 +38,7 @@ COLOR_MAP = {
     "windowBgOver": ("surfaceContainerHigh", "surfaceVariant"),
     "windowBgActive": ("primary", "surfaceTint"),
     "windowFgActive": ("onPrimary", "onSurface"),
+    "windowActiveTextFg": ("primary", "surfaceTint"),
     "topBarBg": ("surfaceContainer", "surface"),
     "titleBg": ("surfaceContainer", "surface"),
     "titleBgActive": ("surfaceContainer", "surface"),
@@ -48,8 +50,12 @@ COLOR_MAP = {
     "dialogsNameFgActive": ("onPrimaryContainer", "onSurface"),
     "dialogsTextFg": ("onSurfaceVariant", "subtext1"),
     "dialogsTextFgActive": ("onPrimaryContainer", "onSurface"),
+    "dialogsTextFgOver": ("onSurfaceVariant", "subtext1"),
+    "dialogsTextFgService": ("primary", "windowActiveTextFg"),
+    "dialogsTextFgServiceOver": ("primary", "windowActiveTextFg"),
+    "dialogsTextFgServiceActive": ("onPrimaryContainer", "primary"),
     "dialogsDateFg": ("onSurfaceVariant", "subtext1"),
-    "dialogsDateFgActive": ("onPrimaryContainer", "onSurface"),
+    "dialogsDateFgActive": ("onPrimaryContainer", "onSurfaceVariant"),
     "filterInputInactiveBg": ("surfaceContainerHigh", "surfaceVariant"),
     "filterInputActiveBg": ("surfaceContainerHighest", "surfaceContainerHigh"),
     "filterInputBorderFg": ("outline", "outlineVariant"),
@@ -59,6 +65,19 @@ COLOR_MAP = {
     "sideBarTextFgActive": ("onPrimaryContainer", "onSurface"),
     "sideBarIconFg": ("onSurfaceVariant", "subtext1"),
     "sideBarIconFgActive": ("primary", "surfaceTint"),
+    
+    "sideBarBadgeBg": ("primary", "surfaceTint"),
+    "sideBarBadgeBgMuted": ("secondary", "primary"),
+    "sideBarBadgeFg": ("onPrimary", "onSurface"),
+
+    "historyPeer1NameFg": ("primary", "surfaceTint"),
+    "historyPeer2NameFg": ("secondary", "primary"),
+    "historyPeer3NameFg": ("tertiary", "secondary"),
+    "historyPeer4NameFg": ("primary", "surfaceTint"),
+    "historyPeer5NameFg": ("secondary", "primary"),
+    "historyPeer6NameFg": ("tertiary", "secondary"),
+    "historyPeer7NameFg": ("primary", "surfaceTint"),
+    "historyPeer8NameFg": ("secondary", "primary"),
     "historyBg": ("background", "surface"),
     "historyTextInFg": ("onSurface", "text"),
     "historyTextOutFg": ("onSurface", "text"),
@@ -77,6 +96,99 @@ COLOR_MAP = {
     "lightButtonBg": ("surfaceContainerHigh", "surfaceVariant"),
     "lightButtonFg": ("onSurface", "text"),
     "inputBorderFg": ("outline", "outlineVariant"),
+        # Window interactions
+    "windowBgRipple": ("primaryContainer", "surfaceContainerHighest"),
+
+    # Dialogs: hover and unread counters
+    "dialogsTextFgOver": ("onSurface", "text"),
+    "dialogsDateFgOver": ("onSurfaceVariant", "subtext1"),
+
+    "dialogsUnreadBg": ("primary", "surfaceTint"),
+    "dialogsUnreadBgMuted": ("secondary", "primary"),
+    "dialogsUnreadFg": ("onPrimary", "onSurface"),
+
+    "dialogsUnreadBgOver": ("primaryDim", "primary"),
+    "dialogsUnreadBgMutedOver": ("secondary", "primary"),
+    "dialogsUnreadFgOver": ("onPrimary", "onSurface"),
+
+    "dialogsUnreadBgActive": ("primary", "surfaceTint"),
+    "dialogsUnreadBgMutedActive": ("secondary", "primary"),
+    "dialogsUnreadFgActive": ("onPrimary", "onSurface"),
+
+    "notificationBg": ("surfaceContainerHigh", "surface"),
+    "notificationsBoxMonitorFg": ("onSurface", "text"),
+    "notificationsBoxScreenBg": ("surfaceContainer", "surface"),
+    "notificationSampleTextFg": ("onSurface", "text"),
+    "notificationSampleNameFg": ("primary", "surfaceTint"),
+    "notificationSampleUserpicFg": ("primary", "surfaceTint"),
+    "notificationSampleCloseFg": ("onSurfaceVariant", "subtext1"),
+
+    # Buttons
+    "activeButtonBgOver": ("primaryDim", "primary"),
+    "activeButtonBgRipple": ("primaryContainer", "primaryDim"),
+    "lightButtonBgOver": ("surfaceContainerHighest", "surfaceContainerHigh"),
+    "lightButtonBgRipple": ("secondaryContainer", "surfaceContainerHighest"),
+
+    # Menus
+    "menuBg": ("surfaceContainer", "surface"),
+    "menuBgOver": ("surfaceContainerHigh", "surfaceVariant"),
+    "menuBgRipple": ("primaryContainer", "surfaceContainerHighest"),
+    "menuIconFg": ("onSurfaceVariant", "subtext1"),
+    "menuIconFgOver": ("primary", "surfaceTint"),
+
+    # Inputs
+    "placeholderFg": ("onSurfaceVariant", "subtext1"),
+    "placeholderFgActive": ("primary", "surfaceTint"),
+
+    # Message selection
+    "msgInBgSelected": ("secondaryContainer", "surfaceContainerHighest"),
+    "msgOutBgSelected": ("primaryDim", "primaryContainer"),
+    "msgSelectOverlay": ("primaryContainer", "secondaryContainer"),
+
+    # System messages and unread separator
+    "historySystemBg": ("surfaceContainerHigh", "surfaceVariant"),
+    "historySystemFg": ("onSurface", "text"),
+    "historyUnreadBarBg": ("primaryContainer", "surfaceContainerHighest"),
+    "historyUnreadBarBorder": ("surface", "background"),
+    "historyUnreadBarFg": ("onPrimaryContainer", "onSurface"),
+
+    # History scrollbars
+    "historyScrollBarBg": ("primaryDim", "primary"),
+    "historyScrollBarBgOver": ("primary", "surfaceTint"),
+    "historyScrollBg": ("surfaceContainerHighest", "surfaceVariant"),
+    "historyScrollBgOver": ("outline", "outlineVariant"),
+
+        # Sent message checkmarks
+    "dialogsSentIconFg": ("primary", "surfaceTint"),
+    "dialogsSentIconFgOver": ("primary", "surfaceTint"),
+    "dialogsSentIconFgActive": ("primary", "surfaceTint"),
+
+    "historyOutIconFg": ("primary", "surfaceTint"),
+    "historyOutIconFgSelected": ("onPrimaryContainer", "primary"),
+
+    "historySendingOutIconFg": ("secondary", "primary"),
+    "historySendingInIconFg": ("onSurfaceVariant", "subtext1"),
+
+        # Reply previews inside message bubbles
+    "msgInServiceFg": ("secondary", "primary"),
+    "msgInServiceFgSelected": ("onSecondaryContainer", "onSurface"),
+
+    "msgOutServiceFg": ("primary", "surfaceTint"),
+    "msgOutServiceFgSelected": ("onPrimaryContainer", "primary"),
+
+    "msgInReplyBarColor": ("secondary", "primary"),
+    "msgInReplyBarSelColor": ("onSecondaryContainer", "primary"),
+
+    "msgOutReplyBarColor": ("primary", "surfaceTint"),
+    "msgOutReplyBarSelColor": ("onPrimaryContainer", "primary"),
+
+    "msgImgReplyBarColor": ("primary", "surfaceTint"),
+
+        # Reply preview above the compose field
+    "historyReplyBg": ("surfaceContainerHigh", "surfaceContainer"),
+    "historyReplyIconFg": ("primary", "surfaceTint"),
+    "historyReplyCancelFg": ("onSurfaceVariant", "subtext1"),
+    "historyReplyCancelFgOver": ("primary", "surfaceTint"),
 }
 
 def load_config() -> dict:
@@ -85,16 +197,30 @@ def load_config() -> dict:
         "output_file": str(DEFAULT_OUTPUT),
         "telegram_binary": "/usr/bin/Telegram",
         "restart_timeout_seconds": 20,
+        "background": {
+            "enabled": True,
+            "blur_radius": 12.0,
+            "brightness": 0.72,
+        },
     }
+
     try:
         user = json.loads(CONFIG_FILE.read_text(encoding="utf-8"))
+
         if not isinstance(user, dict):
             raise ValueError("config root must be a JSON object")
+
+        user_background = user.pop("background", {})
+        if not isinstance(user_background, dict):
+            raise ValueError("'background' must be a JSON object")
+
         defaults.update(user)
+        defaults["background"].update(user_background)
+
     except FileNotFoundError:
         pass
-    return defaults
 
+    return defaults
 
 def setup_logging() -> None:
     APP_STATE.mkdir(parents=True, exist_ok=True)
@@ -157,6 +283,117 @@ def get_wallpaper() -> Path:
     )
 
 
+
+def process_wallpaper(
+    wallpaper: Path,
+    settings: dict,
+) -> tuple[str, bytes | None]:
+    """
+    Process and compress the current wallpaper for Telegram.
+
+    Always exports JPEG to keep the theme archive small.
+    If processing is disabled, no wallpaper is added.
+    """
+    enabled = settings.get("enabled", False)
+
+    if not isinstance(enabled, bool):
+        raise ValueError("background.enabled must be a boolean")
+
+    if not enabled:
+        return "background.jpg", None
+
+    if wallpaper.suffix.lower() not in {".jpg", ".jpeg", ".png"}:
+        raise ValueError(
+            f"Telegram theme wallpaper must be JPEG or PNG; got {wallpaper.name}"
+        )
+
+    try:
+        from PIL import Image, ImageEnhance, ImageFilter, ImageOps
+    except ImportError as exc:
+        raise RuntimeError(
+            "Wallpaper processing requires Pillow. "
+            "Install it with: sudo pacman -S python-pillow"
+        ) from exc
+
+    try:
+        blur_radius = float(settings.get("blur_radius", 12.0))
+        brightness = float(settings.get("brightness", 0.72))
+    except (TypeError, ValueError) as exc:
+        raise ValueError("Invalid background processing settings") from exc
+
+    if not 0 <= blur_radius <= 100:
+        raise ValueError("background.blur_radius must be between 0 and 100")
+
+    if not 0 <= brightness <= 2:
+        raise ValueError("background.brightness must be between 0 and 2")
+
+    with Image.open(wallpaper) as source:
+        image = ImageOps.exif_transpose(source).convert("RGB")
+
+    if blur_radius > 0:
+        image = image.filter(
+            ImageFilter.GaussianBlur(radius=blur_radius)
+        )
+
+    if brightness != 1.0:
+        image = ImageEnhance.Brightness(image).enhance(brightness)
+
+    # Keep the wallpaper below 4 MiB to leave room for the color file
+    # and ZIP metadata.
+    target_size = 4 * 1024 * 1024
+
+    qualities = (90, 85, 80, 75, 70, 65, 60, 55)
+    max_dimension = max(image.size)
+
+    for resize_step in range(12):
+        if resize_step == 0:
+            candidate = image
+        else:
+            scale = 0.85 ** resize_step
+            width = max(1, round(image.width * scale))
+            height = max(1, round(image.height * scale))
+
+            candidate = image.resize(
+                (width, height),
+                Image.Resampling.LANCZOS,
+            )
+
+        for quality in qualities:
+            buffer = io.BytesIO()
+
+            candidate.save(
+                buffer,
+                format="JPEG",
+                quality=quality,
+                optimize=True,
+                progressive=True,
+            )
+
+            image_data = buffer.getvalue()
+
+            if len(image_data) <= target_size:
+                logging.info(
+                    "Processed wallpaper: %dx%d, quality=%d, "
+                    "size=%.2f MiB, blur=%.1f, brightness=%.2f",
+                    candidate.width,
+                    candidate.height,
+                    quality,
+                    len(image_data) / (1024 * 1024),
+                    blur_radius,
+                    brightness,
+                )
+
+                return "background.jpg", image_data
+
+        if max(candidate.size) <= 800:
+            break
+
+    raise RuntimeError(
+        "Unable to compress wallpaper below 4 MiB. "
+        f"Original dimensions: {image.width}x{image.height}"
+    )
+
+
 def make_colors(scheme: dict) -> str:
     colours = scheme.get("colours")
     if not isinstance(colours, dict):
@@ -194,15 +431,12 @@ def generate() -> Path:
         raise ValueError("scheme.json root must be a JSON object")
 
     wallpaper = get_wallpaper()
-    suffix = wallpaper.suffix.lower()
-    if suffix in (".jpg", ".jpeg"):
-        archive_wallpaper = "background.jpg"
-    elif suffix == ".png":
-        archive_wallpaper = "background.png"
-    else:
-        raise ValueError(
-            f"Telegram theme wallpaper must be JPEG or PNG; got {wallpaper.name}"
-        )
+
+    background_settings = config.get("background", {})
+    archive_wallpaper, processed_wallpaper = process_wallpaper(
+        wallpaper,
+        background_settings,
+    )
 
     colors_text = make_colors(scheme)
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -212,18 +446,45 @@ def generate() -> Path:
     os.close(fd)
     temp_path = Path(temp_name)
     try:
-        with zipfile.ZipFile(temp_path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+
+        with zipfile.ZipFile(
+            temp_path,
+            "w",
+            compression=zipfile.ZIP_DEFLATED,
+        ) as archive:
             archive.writestr("colors.tdesktop-theme", colors_text)
-            archive.write(wallpaper, archive_wallpaper)
+
+            if processed_wallpaper is not None:
+                archive.writestr(archive_wallpaper, processed_wallpaper)
+
         # Validate archive before replacing the previously working theme.
         with zipfile.ZipFile(temp_path, "r") as archive:
             bad = archive.testzip()
             if bad:
                 raise RuntimeError(f"Generated archive failed validation: {bad}")
+
             names = set(archive.namelist())
-            if "colors.tdesktop-theme" not in names or archive_wallpaper not in names:
-                raise RuntimeError("Generated archive is missing required files")
+
+            if "colors.tdesktop-theme" not in names:
+                raise RuntimeError("Generated archive is missing colors.tdesktop-theme")
+
+            if processed_wallpaper is not None and archive_wallpaper not in names:
+                raise RuntimeError("Generated archive is missing its wallpaper")
+
+            if processed_wallpaper is None and archive_wallpaper in names:
+                raise RuntimeError("Wallpaper should not be present when disabled")
+
+        # Telegram theme archive size limit: 5 MiB.
+        max_archive_size = 5 * 1024 * 1024
+        archive_size = temp_path.stat().st_size
+
+        if archive_size > max_archive_size:
+            raise RuntimeError(
+                f"Generated theme is too large: {archive_size / (1024 * 1024):.2f} MiB "
+                f"(limit: {max_archive_size / (1024 * 1024):.2f} MiB)"
+            )
         os.replace(temp_path, output_path)
+
     finally:
         try:
             temp_path.unlink()
@@ -496,9 +757,115 @@ def trigger() -> None:
     )
 
 
+def configure() -> None:
+    config = load_config()
+    background = config["background"]
+
+    def ask_bool(prompt: str, current: bool) -> bool:
+        default = "Y/n" if current else "y/N"
+
+        while True:
+            answer = input(f"{prompt} [{default}]: ").strip().lower()
+
+            if not answer:
+                return current
+            if answer in ("y", "yes"):
+                return True
+            if answer in ("n", "no"):
+                return False
+
+            print("Enter y or n.")
+
+    def ask_float(
+        prompt: str,
+        current: float,
+        minimum: float,
+        maximum: float,
+    ) -> float:
+        while True:
+            answer = input(f"{prompt} [{current}]: ").strip()
+
+            if not answer:
+                return current
+
+            try:
+                value = float(answer)
+            except ValueError:
+                print("Enter a valid number.")
+                continue
+
+            if minimum <= value <= maximum:
+                return value
+
+            print(f"Value must be between {minimum} and {maximum}.")
+
+    print("\nCaelestia Telegram Theme configuration")
+    print("--------------------------------------")
+    print("Wallpaper processing")
+    print("  Enabled: bundle the current Caelestia wallpaper into the theme")
+    print("           archive and keep it in sync with wallpaper changes.")
+    print("  Disabled: theme contains colours only; Telegram keeps whatever")
+    print("            background you selected in its settings.")
+    print("  Tip: to bundle the wallpaper unmodified, enable processing and set")
+    print("       blur_radius=0, brightness=1.")
+    background["enabled"] = ask_bool(
+        "Enable wallpaper blur and darkening?",
+        background["enabled"],
+    )
+
+    if background["enabled"]:
+        background["blur_radius"] = ask_float(
+            "Blur radius (0-100)",
+            float(background["blur_radius"]),
+            0,
+            100,
+        )
+
+        background["brightness"] = ask_float(
+            "Brightness multiplier (0-2; 1 = original)",
+            float(background["brightness"]),
+            0,
+            2,
+        )
+
+    CONFIG_FILE.parent.mkdir(parents=True, exist_ok=True)
+
+    fd, temp_name = tempfile.mkstemp(
+        prefix=CONFIG_FILE.name + ".",
+        suffix=".tmp",
+        dir=CONFIG_FILE.parent,
+    )
+
+    temp_path = Path(temp_name)
+
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as file:
+            json.dump(config, file, indent=4, ensure_ascii=False)
+            file.write("\n")
+
+        os.replace(temp_path, CONFIG_FILE)
+
+    finally:
+        temp_path.unlink(missing_ok=True)
+
+    print(f"\nConfiguration saved to: {CONFIG_FILE}")
+
+    if background["enabled"]:
+        try:
+            import PIL  # noqa: F401
+        except ImportError:
+            print(
+                "\nWarning: Pillow is not installed. "
+                "Install it with: sudo pacman -S python-pillow"
+            )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=("generate", "update", "trigger", "status"))
+    parser.add_argument(
+    "action",
+    choices=("generate", "update", "trigger", "status", "configure"),
+    )
     args = parser.parse_args()
     setup_logging()
     try:
@@ -510,9 +877,21 @@ def main() -> int:
         elif args.action == "trigger":
             trigger()
         elif args.action == "status":
-            print(f"Output: {load_config()['output_file']}")
+            cfg = load_config()
+            bg = cfg.get("background", {})
+            if bg.get("enabled"):
+                wallpaper_mode = (
+                    f"bundled (blur={bg.get('blur_radius')}, "
+                    f"brightness={bg.get('brightness')})"
+                )
+            else:
+                wallpaper_mode = "not bundled (Telegram keeps its own)"
+            print(f"Output: {cfg['output_file']}")
             print(f"Telegram running: {'yes' if telegram_pids() else 'no'}")
             print(f"Log: {LOG_FILE}")
+            print(f"Wallpaper: {wallpaper_mode}")
+        elif args.action == "configure":
+            configure()
         return 0
     except Exception as exc:
         logging.exception("Action %s failed: %s", args.action, exc)
