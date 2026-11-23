@@ -8,6 +8,11 @@ Automatically builds a Telegram Desktop `.tdesktop-theme` archive from the
 current Caelestia Material 3 palette and current wallpaper, and keeps
 Telegram in sync as the palette or wallpaper changes.
 
+
+## Preview
+![Screenshot 1: example with my wallpapers](images/screen1.png)
+![Screenshot 2: example with my wallpapers](images/screen2.png)
+
 ## Features
 
 - Maps Caelestia's Material 3 roles to Telegram Desktop colour keys
