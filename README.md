@@ -134,13 +134,12 @@ The service:
    `WALLPAPER_PATH` or legacy state files;
 3. processes the wallpaper if `background.enabled=true`;
 4. builds and validates the archive;
-5. if Telegram is already running, sends `SIGTERM`, waits up to
-   `restart_timeout_seconds`, then starts `telegram_binary` again and moves
-   the new window back to its previous Hyprland workspace.
+5. atomically replaces the generated `.tdesktop-theme` archive.
 
-If Telegram is not running, the theme is generated but Telegram is not
-started. It deliberately does not use `SIGKILL` if Telegram does not exit
-cleanly.
+Telegram Desktop automatically reloads the imported theme when that file is
+replaced, so palette and wallpaper changes apply without restarting Telegram.
+If Telegram is not running, the theme is still generated and will be available
+when Telegram is opened.
 
 ## Commands
 
