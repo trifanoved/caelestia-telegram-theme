@@ -124,12 +124,12 @@ def install_unit() -> None:
     unit.parent.mkdir(parents=True, exist_ok=True)
     unit.write_text(
         "[Unit]\n"
-        "Description=Generate and apply the Caelestia Telegram Desktop theme\n"
+        "Description=Generate the Caelestia Telegram Desktop theme\n"
         "After=graphical-session.target\n"
         "\n"
         "[Service]\n"
         "Type=oneshot\n"
-        "ExecStart=%h/.local/bin/caelestia-telegram-theme update\n"
+        "ExecStart=%h/.local/bin/caelestia-telegram-theme generate\n"
         "TimeoutStartSec=60\n"
         "Environment=PYTHONUNBUFFERED=1\n"
         "\n"
@@ -193,7 +193,7 @@ def main() -> int:
     print("  2. In Telegram, import the generated current.tdesktop-theme once:")
     print("       Settings -> Chat Settings -> Choose from file")
     print("  3. Keep Telegram open; subsequent Caelestia palette/wallpaper changes")
-    print("     will regenerate the same file and restart Telegram automatically.")
+    print("     will regenerate the same file; Telegram reloads the theme automatically.")
 
     if not pillow_ok:
         print("\nWarning: Pillow is missing. The default configuration enables")
