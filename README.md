@@ -15,9 +15,11 @@ Telegram in sync as the palette or wallpaper changes.
 - Bundles the current wallpaper into the theme archive (enabled by
   default), optionally blurred and darkened for readability.
 - Validates the archive before atomically replacing the previous one.
-- Restarts Telegram only when it's already running, waits for a clean exit
-  (no `SIGKILL`), and restores the Telegram window to its previous Hyprland
-  workspace.
+- Supports Telegram's automatic theme reload when the generated archive is
+  atomically replaced; no Telegram restart is needed for palette or wallpaper
+  changes.
+- Keeps an explicit `update` command for cases where a full Telegram restart
+  is desired, restoring its window to the previous Hyprland workspace.
 - Hooks into Caelestia's `wallpaper.postHook` and `theme.postHook` via a
   user systemd oneshot service, with debouncing to collapse bursts of events.
 - Provides an interactive `configure` command for wallpaper processing.
@@ -143,8 +145,8 @@ cleanly.
 ## Commands
 
 ```bash
-caelestia-telegram-theme generate   # Build theme without restarting Telegram
-caelestia-telegram-theme update     # Build theme and restart Telegram if running
+caelestia-telegram-theme generate   # Build/replace theme; Telegram hot-reloads it
+caelestia-telegram-theme update     # Build theme and explicitly restart Telegram if running
 caelestia-telegram-theme trigger    # Trigger the user systemd service
 caelestia-telegram-theme status     # Show output path and process status
 caelestia-telegram-theme configure  # Interactively edit config.json
@@ -224,7 +226,8 @@ suffix, preserving unrelated CLI configuration. It intentionally preserves:
   `theme.postHook`; no Lua changes are required.
 - `hypr-user.lua` is left untouched.
 - If a custom Telegram binary is used, update `telegram_binary` in config.
-- Theme import is a one-time operation for the new archive path.
+- Theme import is a one-time operation for the generated archive path. Later
+  atomic replacements of that same file are picked up by Telegram automatically.
 - Wallpaper processing is on by default; install `python-pillow` or disable
   it with `configure` if you prefer not to use it.
 
