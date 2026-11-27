@@ -220,6 +220,22 @@ COLOR_MAP = {
     "msgDateImgBgOver": ("surfaceContainerHigh", "surfaceVariant"),
     "msgDateImgBgSelected": ("primaryContainer", "surfaceContainerHigh"),
 
+    # Telegram's actual theme keys for file icons and selection checks
+    "historyFileInIconFg": ("primary", "surfaceTint"),
+    "historyFileInIconFgSelected": ("onPrimaryContainer", "primary"),
+    "historyFileOutIconFg": ("primary", "surfaceTint"),
+    "historyFileOutIconFgSelected": ("onPrimaryContainer", "primary"),
+    "overviewCheckFgActive": ("onPrimary", "onSurface"),
+    "settingsIconBg1": ("primaryContainer", "surfaceContainerHigh"),
+    "settingsIconBg2": ("secondaryContainer", "surfaceContainerHigh"),
+    "settingsIconBg3": ("tertiaryContainer", "surfaceContainerHigh"),
+    "settingsIconBg4": ("errorContainer", "surfaceContainerHigh"),
+    "settingsIconBg5": ("primaryContainer", "surfaceContainerHigh"),
+    "settingsIconBg6": ("secondaryContainer", "surfaceContainerHigh"),
+    "settingsIconBg8": ("tertiaryContainer", "surfaceContainerHigh"),
+    "settingsIconBgArchive": ("surfaceContainerHigh", "surfaceContainer"),
+
+
     # Selection indicators in shared media and file lists
     "overviewCheckBg": ("primary", "surfaceTint"),
     "overviewCheckFg": ("onPrimary", "onSurface"),
