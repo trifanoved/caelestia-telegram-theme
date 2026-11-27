@@ -236,6 +236,7 @@ COLOR_MAP = {
     "mediaviewFileBlueCornerFg": ("primary", "surfaceTint"),
     "overviewCheckBgActive": ("primaryContainer", "surfaceContainerHigh"),
     "overviewCheckFgActive": ("onPrimaryContainer", "onSurface"),
+    "boxTextFgGood": ("primary", "surfaceTint"),
     "settingsIconBg1": ("primaryContainer", "surfaceContainerHigh"),
     "settingsIconBg2": ("secondaryContainer", "surfaceContainerHigh"),
     "settingsIconBg3": ("tertiaryContainer", "surfaceContainerHigh"),
