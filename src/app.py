@@ -33,12 +33,13 @@ LOCK_FILE = APP_STATE / "trigger.lock"
 # Retains the user's existing colour design while sourcing every value from
 # Caelestia's Material 3 scheme. Fallbacks are only used if a role is absent.
 COLOR_MAP = {
-    "windowBg": ("surface", "background"),
+    "windowBg": ("surfaceContainerLow", "surfaceContainer"),
     "windowFg": ("onSurface", "text"),
     "windowBgOver": ("surfaceContainerHigh", "surfaceVariant"),
-    "windowBgActive": ("primary", "surfaceTint"),
+    "windowBgActive": ("primaryContainer", "surfaceContainerHigh"),
     "windowFgActive": ("onPrimary", "onSurface"),
     "windowActiveTextFg": ("primary", "surfaceTint"),
+    "windowSubTextFg": ("onSurfaceVariant", "onSurface"),
     "topBarBg": ("surfaceContainer", "surface"),
     "titleBg": ("surfaceContainer", "surface"),
     "titleBgActive": ("surfaceContainer", "surface"),
@@ -59,12 +60,16 @@ COLOR_MAP = {
     "filterInputInactiveBg": ("surfaceContainerHigh", "surfaceVariant"),
     "filterInputActiveBg": ("surfaceContainerHighest", "surfaceContainerHigh"),
     "filterInputBorderFg": ("outline", "outlineVariant"),
-    "sideBarBg": ("surface", "background"),
+    "sideBarBg": ("surfaceContainer", "surfaceContainerLow"),
     "sideBarBgActive": ("primaryContainer", "surfaceContainerHigh"),
     "sideBarTextFg": ("onSurface", "text"),
     "sideBarTextFgActive": ("onPrimaryContainer", "onSurface"),
     "sideBarIconFg": ("onSurfaceVariant", "subtext1"),
     "sideBarIconFgActive": ("primary", "surfaceTint"),
+
+    # Telegram emoji picker surfaces
+    "emojiPanBg": ("surfaceContainer", "surfaceContainerLow"),
+    "emojiPanCategories": ("surfaceContainerHigh", "surfaceContainer"),
     
     "sideBarBadgeBg": ("primary", "surfaceTint"),
     "sideBarBadgeBgMuted": ("secondary", "primary"),
@@ -229,8 +234,8 @@ COLOR_MAP = {
     "mediaviewFileYellowCornerFg": ("tertiary", "secondary"),
     "mediaviewFileGreenCornerFg": ("secondary", "primary"),
     "mediaviewFileBlueCornerFg": ("primary", "surfaceTint"),
-    "overviewCheckBgActive": ("primary", "surfaceTint"),
-    "overviewCheckFgActive": ("onPrimary", "onSurface"),
+    "overviewCheckBgActive": ("primaryContainer", "surfaceContainerHigh"),
+    "overviewCheckFgActive": ("onPrimaryContainer", "onSurface"),
     "settingsIconBg1": ("primaryContainer", "surfaceContainerHigh"),
     "settingsIconBg2": ("secondaryContainer", "surfaceContainerHigh"),
     "settingsIconBg3": ("tertiaryContainer", "surfaceContainerHigh"),
@@ -242,7 +247,7 @@ COLOR_MAP = {
 
 
     # Selection indicators in shared media and file lists
-    "overviewCheckBg": ("primary", "surfaceTint"),
+    "overviewCheckBg": ("surfaceContainerHigh", "surfaceContainer"),
     "overviewCheckFg": ("onPrimary", "onSurface"),
     "overviewPhotoSelectOverlay": ("primaryContainer", "surfaceContainerHigh"),
 
