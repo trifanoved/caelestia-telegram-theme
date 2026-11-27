@@ -239,7 +239,6 @@ COLOR_MAP = {
     # Selection indicators in shared media and file lists
     "overviewCheckBg": ("primary", "surfaceTint"),
     "overviewCheckFg": ("onPrimary", "onSurface"),
-    "overviewCheckFgActive": ("onPrimary", "onSurface"),
     "overviewPhotoSelectOverlay": ("primaryContainer", "surfaceContainerHigh"),
 
     # Popup menus and separators
