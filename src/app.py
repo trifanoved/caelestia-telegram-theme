@@ -39,7 +39,7 @@ COLOR_MAP = {
     "windowBgActive": ("primaryContainer", "surfaceContainerHigh"),
     "windowFgActive": ("onPrimary", "onSurface"),
     "windowActiveTextFg": ("primary", "surfaceTint"),
-    "windowSubTextFg": ("onSurfaceVariant", "onSurface"),
+    "windowSubTextFg": ("onSurface", "text"),
     "topBarBg": ("surfaceContainer", "surface"),
     "titleBg": ("surfaceContainer", "surface"),
     "titleBgActive": ("surfaceContainer", "surface"),
